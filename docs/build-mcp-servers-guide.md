@@ -2,6 +2,147 @@
 
 This guide provides detailed instructions for creating Model Context Protocol (MCP) servers that work seamlessly with Cursor's MCP client implementation. This guide has been thoroughly tested and includes solutions to common pitfalls.
 
+## Important Note for AI Agents
+
+If you are an AI agent helping a user create an MCP server, you MUST follow these steps in sequence:
+
+1. **Project Creation**
+   - Create the project structure and all necessary files as outlined in Steps 1-4
+   - Ensure all critical configuration points are addressed
+   - Verify the server implementation includes proper error handling and logging
+
+2. **Local Testing**
+   - Guide the user through Step 5 to test the server locally
+   - Do not proceed until local testing is successful
+
+3. **Cursor Integration**
+   - IMPORTANT: After creating the server, you MUST help the user set up the server in Cursor
+   - Guide them through Step 6 to create/update their `~/.cursor/mcp.json`
+   - Help them verify the installation is working
+
+4. **Optional: Publishing**
+   - If the user wants to share their server:
+     a. Guide them through publishing to npm
+     b. Help them update their package.json for publishing
+     c. Ensure they have the correct npm credentials
+
+Remember:
+- Don't stop after just creating the code
+- Always prompt for Cursor configuration
+- Verify each step before moving to the next
+- Help troubleshoot any issues using the guide's debugging sections
+
+## AI Agent Implementation Patterns
+
+When implementing an MCP server as an AI agent, follow these patterns:
+
+1. **Initial User Interaction**
+   - Ask about the intended functionality of their MCP server
+   - Confirm if they want to publish it or keep it local
+   - Get their preferred server name and npm username if publishing
+   - Determine if they need any specific environment variables or API keys
+
+2. **Project Creation Workflow**
+   ```
+   1. Create project structure
+   2. Generate package.json
+   3. Create server implementation
+   4. Add initial ping tool
+   5. Add user's requested tools
+   6. Test locally
+   7. Configure in Cursor
+   8. Optional: Publish to npm
+   ```
+
+3. **Required Prompts**
+   Always prompt the user for:
+   - Server name confirmation before configuration
+   - Testing results after local installation
+   - Cursor restart after configuration
+   - Verification of tool availability in Cursor
+
+4. **Error Recovery**
+   If any step fails:
+   - Check the flowchart in the Troubleshooting section
+   - Guide user through relevant fixes
+   - Verify fix before moving to next step
+   - Update configuration if needed
+
+5. **Configuration Verification**
+   After creating `~/.cursor/mcp.json`:
+   - Confirm file exists
+   - Verify JSON syntax
+   - Check server name matches
+   - Test with ping tool
+   - Monitor logs for errors
+
+6. **Documentation Requirements**
+   Always create:
+   - README.md with setup instructions
+   - Comments in server code
+   - Tool documentation
+   - Troubleshooting notes
+
+7. **Publishing Checklist**
+   If publishing:
+   - Verify package name availability
+   - Check npm credentials
+   - Test package locally
+   - Update all documentation
+   - Guide through npm publish
+   - Verify installation works
+
+## User Interaction Guidelines for AI Agents
+
+1. **Gathering Requirements**
+   ```
+   Ask → Confirm → Clarify → Proceed
+   ```
+   - Ask specific questions about requirements
+   - Confirm understanding before proceeding
+   - Clarify any ambiguities immediately
+   - Only proceed when requirements are clear
+
+2. **Verification Points**
+   After each major step:
+   ```
+   Action → Check → Verify → Continue/Fix
+   ```
+   - Confirm the action completed successfully
+   - Check for expected output/behavior
+   - Verify with the user if needed
+   - Either continue or fix issues
+
+3. **Error Handling**
+   When errors occur:
+   ```
+   Detect → Explain → Guide → Verify
+   ```
+   - Detect the specific error
+   - Explain the issue in simple terms
+   - Guide through the fix step by step
+   - Verify the fix resolved the issue
+
+4. **Configuration Steps**
+   For each configuration:
+   ```
+   Propose → Implement → Test → Confirm
+   ```
+   - Propose the configuration change
+   - Implement after user approval
+   - Test the configuration
+   - Confirm it's working as expected
+
+5. **Tool Implementation**
+   For each tool:
+   ```
+   Design → Implement → Test → Document
+   ```
+   - Design the tool interface
+   - Implement the functionality
+   - Test with example inputs
+   - Document usage and parameters
+
 ## Core Concepts
 
 1. **Model Context Protocol (MCP)** - A standardized protocol for communication between AI assistants and external tools.
@@ -269,229 +410,79 @@ npx .
 cat ~/mcp-debug.log
 ```
 
-## Step 6: Configuring Your Server in Cursor
+## Step 6: Quick Setup in Cursor
 
-### Understanding Cursor's MCP Configuration
+For a quick start with your MCP server in Cursor:
 
-Cursor uses a configuration file located at `~/.cursor/mcp.json` to manage MCP servers. While you can edit this file directly, it's recommended to use Cursor's built-in settings UI for configuration.
-
-### Configuration Steps
-
-1. **Open Cursor Settings**
-   - Use the keyboard shortcut `Cmd+,` (Mac) or `Ctrl+,` (Windows/Linux)
-   - Or click on the gear icon in the bottom left corner
-   - Navigate to the "MCP" section in the left sidebar
-   - You'll see the "MCP Servers" section with a blue "+ Add new global MCP server" button at the top right
-
-   ![MCP Servers Configuration](documentation/images/mcp-servers-config.png)
-
-   The MCP Servers section shows:
-   - A list of configured servers with their enabled/disabled status
-   - Tools available for each server
-   - The command used to start each server
-   - Resource status
-   - Action buttons for each server (reload, edit, etc.)
-
-2. **Add New Server**
-   - Click the "+ Add new global MCP server" button
-   - This will open the `~/.cursor/mcp.json` file
-   - Add your server configuration to the `mcpServers` object using this structure:
-   
+1. **Add MCP Server Configuration**
+   Create or update your Cursor MCP configuration file at `~/.cursor/mcp.json`:
    ```json
    {
-     "mcpServers": {
-       "your-server-name": {
-         "command": "npx",
-         "args": [
-           "-y",
-           "your-package-name"
-         ]
+     "servers": {
+       "my-mcp-server": {
+         "command": "npx -y my-mcp-server"
        }
      }
    }
    ```
-
-   Example of a real configuration:
-   ```json
-   {
-     "mcpServers": {
-       "timekeeping": {
-         "command": "npx",
-         "args": [
-           "-y",
-           "mcp-timekeeping-server"
-         ]
-       }
-     }
-   }
-   ```
-
-   The configuration file supports multiple servers, as shown in the example below:
-   ```json
-   {
-     "mcpServers": {
-       "sequential-thinking": {
-         "command": "npx",
-         "args": [
-           "-y",
-           "@modelcontextprotocol/server-sequential-thinking"
-         ]
-       },
-       "browser-tools": {
-         "command": "npx",
-         "args": [
-           "@agentdeskai/browser-tools-mcp@1.0.11"
-         ]
-       }
-     }
-   }
-   ```
-
-3. **Configuration Fields**:
-   - `mcpServers`: The root object containing all server configurations
-   - Server name (e.g., "timekeeping"): Must match your server's name in code
-   - `command`: Usually "npx" for npm packages
-   - `args`: Array of command arguments
-     - `-y`: Optional, automatically answers "yes" to npx prompts
-     - Package name: Your published package name
-
-### Testing the Configuration
-
-1. **Restart Cursor**
-   - Close and reopen Cursor to ensure changes take effect
-   - Or use the Command Palette (Cmd/Ctrl+Shift+P) and search for "Reload Window"
-
-2. **Verify Server Configuration**
-   - Open Cursor Settings (Cmd/Ctrl+,)
-   - Navigate to the MCP section
-   - Your server should appear in the list with:
-     - Enabled/disabled status
-     - Available tools
-     - Command configuration
-     - Resource status
-   - Use the action buttons (reload, edit) to manage your server
-
-3. **Test Connection**
-   - With your server enabled, try using one of its tools
-   - For example, use the ping tool if you've implemented one
-   - You should see a successful response in the chat
-
-### Troubleshooting Configuration
-
-If your server doesn't appear or work as expected:
-
-1. **Check Server Name Match**
-   - The name in your server code MUST match exactly:
-     ```javascript
-     const server = new mcp.McpServer({
-       name: 'your-server-name',  // This name
-       version: '0.1.0'
-     });
-     ```
-   - Must match the name in Cursor settings
-   - Must match the name in `~/.cursor/mcp.json`
 
 2. **Verify Installation**
-   ```bash
-   # Check global installation
-   npm list -g | grep mcp-your-server-name
-   
-   # Test direct execution
-   mcp-your-server-name
-   ```
+   - Restart Cursor to load the new MCP configuration
+   - The server's logs will be written to `~/mcp-debug.log`
+   - You can verify the server is working by:
+     a. Opening Cursor's command palette
+     b. Running the command "MCP: Test Tool"
+     c. Selecting "my-mcp-server" and the "ping" tool
+     d. Optionally providing a message parameter
+     e. Checking the response ("Pong!") and the log file for confirmation
 
-3. **Check Logs**
-   - Server logs: `~/mcp-debug.log`
-   - Cursor logs: Check the Developer Tools (Help > Toggle Developer Tools)
+3. **Troubleshooting**
+   - If the server doesn't appear in Cursor's MCP tools:
+     * Verify the server name in `mcp.json` matches the name in your server code
+     * Check `~/mcp-debug.log` for startup errors
+     * Ensure the `bin` field in package.json matches your server name
+   - If you see connection errors:
+     * Verify the server is executable (`chmod +x bin/server.cjs`)
+     * Check if `npx -y my-mcp-server` works in terminal
+     * Look for error messages in Cursor's developer console
 
-4. **Common Configuration Errors**
-   - "Server not found": Check npm installation and package name
-   - "Failed to start server": Check command and arguments
-   - "Server not responding": Check server name match
-   [SCREENSHOT 7: Example error message and resolution]
-
-### Configuration Best Practices
-
-1. **Use Scoped Package Names**
-   - Always use scoped names (@username/package-name)
-   - Helps avoid naming conflicts
-   - Makes server identification clearer
-
-2. **Version Management**
-   - Use exact versions in package.json
-   - Update versions carefully
-   - Test after version changes
-
-3. **Multiple Environments**
-   - Development: Use direct path
-     ```json
-     {
-       "name": "your-server-name",
-       "command": "node",
-       "args": ["./bin/server.cjs"]
-     }
-     ```
-   - Production: Use npx installation
-     ```json
-     {
-       "name": "your-server-name",
-       "command": "npx",
-       "args": ["-y", "@yourusername/mcp-your-server-name"]
-     }
-     ```
+4. **Development Tips**
+   - Monitor `~/mcp-debug.log` while developing
+   - Test tool changes by restarting Cursor
+   - Use the log file to debug tool execution and parameter handling
 
 ## Advanced Configuration
 
 ### Managing Multiple Servers
 
-You can configure multiple MCP servers in your `~/.cursor/mcp.json` file. Each server can have its own configuration and purpose:
+You can configure multiple MCP servers in your `~/.cursor/mcp.json` file:
 
 ```json
 {
-  "mcpServers": {
+  "servers": {
     "utility-server": {
-      "command": "npx",
-      "args": ["-y", "@yourusername/mcp-utility-server"]
+      "command": "npx -y @yourusername/mcp-utility-server"
     },
     "data-processing": {
-      "command": "node",
-      "args": ["./local/path/to/server.cjs"]
+      "command": "node ./local/path/to/server.cjs"
     },
     "api-server": {
-      "command": "env",
-      "args": [
-        "API_KEY=your-secret-key",
-        "npx",
-        "-y",
-        "@yourusername/mcp-api-server"
-      ]
+      "command": "env API_KEY=your-secret-key npx -y @yourusername/mcp-api-server"
     }
   }
 }
 ```
 
-Best practices for managing multiple servers:
-1. Use descriptive names that reflect each server's purpose
-2. Keep related tools grouped in the same server
-3. Consider splitting complex functionality across multiple focused servers
-4. Use consistent naming conventions across your servers
-
 ### Environment Variables and Secrets
 
-Some MCP servers require environment variables or API keys. There are several ways to handle these:
+Some MCP servers require environment variables or API keys:
 
-1. **Using the `env` command**:
+1. **Using env command**:
    ```json
    {
-     "mcpServers": {
+     "servers": {
        "api-server": {
-         "command": "env",
-         "args": [
-           "API_KEY=your-secret-key",
-           "npx",
-           "-y",
-           "@yourusername/mcp-api-server"
-         ]
+         "command": "env API_KEY=your-secret-key npx -y @yourusername/mcp-api-server"
        }
      }
    }
@@ -500,154 +491,161 @@ Some MCP servers require environment variables or API keys. There are several wa
 2. **Using environment files**:
    ```json
    {
-     "mcpServers": {
+     "servers": {
        "api-server": {
-         "command": "bash",
-         "args": ["-c", "source .env && npx -y @yourusername/mcp-api-server"]
+         "command": "bash -c \"source .env && npx -y @yourusername/mcp-api-server\""
        }
      }
    }
    ```
 
-3. **Using shell environment**:
+### Version Management
+
+Control server versions in your configuration:
+
+1. **Pin specific version**:
    ```json
    {
-     "mcpServers": {
-       "api-server": {
-         "command": "$HOME/.nvm/versions/node/v16.14.0/bin/npx",
-         "args": ["-y", "@yourusername/mcp-api-server"]
-       }
-     }
-   }
-   ```
-
-Best practices for handling environment variables:
-1. Never commit sensitive values to version control
-2. Use environment files for local development
-3. Document required environment variables
-4. Consider using a secrets management solution for production
-
-### Server Versioning and Updates
-
-Managing MCP server versions effectively is crucial for stability and maintenance:
-
-1. **Version Pinning**:
-   ```json
-   {
-     "mcpServers": {
+     "servers": {
        "stable-server": {
-         "command": "npx",
-         "args": ["-y", "@yourusername/mcp-server@1.2.3"]
+         "command": "npx -y @yourusername/mcp-server@1.2.3"
        }
      }
    }
    ```
 
-2. **Using Latest Version**:
+2. **Use latest version**:
    ```json
    {
-     "mcpServers": {
+     "servers": {
        "edge-server": {
-         "command": "npx",
-         "args": ["-y", "@yourusername/mcp-server@latest"]
+         "command": "npx -y @yourusername/mcp-server@latest"
        }
      }
    }
    ```
 
-Best practices for versioning:
-1. Pin versions in production environments
-2. Test updates in development first
-3. Maintain a changelog
-4. Use semantic versioning
-5. Document breaking changes
+### Development vs Production
 
-### TypeScript Support
+Different configurations for different environments:
 
-To add TypeScript support to your MCP server:
-
-1. **Install TypeScript dependencies**:
-   ```bash
-   npm install --save-dev typescript @types/node
-   ```
-
-2. **Create tsconfig.json**:
+1. **Development** (using local files):
    ```json
    {
-     "compilerOptions": {
-       "target": "ES2020",
-       "module": "commonjs",
-       "outDir": "./dist",
-       "rootDir": "./src",
-       "strict": true,
-       "esModuleInterop": true,
-       "skipLibCheck": true,
-       "forceConsistentCasingInFileNames": true
-     },
-     "include": ["src/**/*"],
-     "exclude": ["node_modules", "dist"]
-   }
-   ```
-
-3. **Update package.json**:
-   ```json
-   {
-     "scripts": {
-       "build": "tsc",
-       "start": "node dist/bin/server.js",
-       "dev": "tsc -w"
-     },
-     "bin": {
-       "mcp-your-server-name": "dist/bin/server.js"
+     "servers": {
+       "dev-server": {
+         "command": "node ./bin/server.cjs"
+       }
      }
    }
    ```
 
-4. **Example TypeScript Implementation**:
-   ```typescript
-   #!/usr/bin/env node
-   import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-   import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-   import { z } from 'zod';
-
-   interface ServerConfig {
-     name: string;
-     version: string;
+2. **Production** (using published package):
+   ```json
+   {
+     "servers": {
+       "prod-server": {
+         "command": "npx -y @yourusername/mcp-server"
+       }
+     }
    }
-
-   async function runServer(config: ServerConfig) {
-     const server = new McpServer({
-       name: config.name,
-       version: config.version
-     });
-
-     // Type-safe tool implementation
-     server.tool('ping', {
-       message: z.string().optional()
-     }, async (params) => {
-       return {
-         content: [{
-           type: 'text' as const,
-           text: `Pong! ${params.message || ''}`
-         }]
-       };
-     });
-
-     const transport = new StdioServerTransport();
-     server.connect(transport);
-   }
-
-   runServer({
-     name: 'typescript-server',
-     version: '1.0.0'
-   }).catch(console.error);
    ```
 
-Remember to:
-1. Compile TypeScript before publishing
-2. Include type definitions
-3. Use strict type checking
-4. Leverage TypeScript's type system for tool parameters
+### Best Practices
+
+1. **Server Naming**
+   - Use descriptive, lowercase names with hyphens
+   - Match names exactly between code and configuration
+   - Use scoped package names (@username/package-name)
+
+2. **Version Control**
+   - Pin versions in production
+   - Test updates in development first
+   - Keep a changelog
+   - Document breaking changes
+
+3. **Security**
+   - Never commit sensitive values
+   - Use environment files for local development
+   - Consider secrets management for production
+   - Document required environment variables
+
+4. **Monitoring**
+   - Check logs regularly
+   - Monitor server resource usage
+   - Set up error notifications
+   - Keep backups of configurations
+
+## Publishing Your MCP Server
+
+If you want to share your MCP server with others, you'll need to publish it to npm:
+
+1. **Prepare for Publishing**
+   - Ensure your package.json is properly configured:
+     ```json
+     {
+       "name": "@yourusername/mcp-your-server-name",
+       "version": "0.1.0",
+       "publishConfig": {
+         "access": "public"
+       }
+     }
+     ```
+   - Update README.md with:
+     * Installation instructions
+     * Configuration steps
+     * Available tools and their parameters
+     * Example usage
+
+2. **Create npm Account**
+   ```bash
+   npm adduser
+   ```
+   Follow the prompts to create or login to your npm account
+
+3. **Test Package**
+   ```bash
+   # Pack without publishing
+   npm pack
+   
+   # Verify contents
+   tar -tvf *.tgz
+   ```
+
+4. **Publish Package**
+   ```bash
+   # For first-time publish
+   npm publish --access public
+   
+   # For updates
+   npm version patch  # or minor/major
+   npm publish
+   ```
+
+5. **Verify Installation**
+   ```bash
+   # Create test directory
+   mkdir test-install
+   cd test-install
+   
+   # Test install
+   npm install @yourusername/mcp-your-server-name
+   
+   # Verify it runs
+   npx @yourusername/mcp-your-server-name
+   ```
+
+6. **Update Cursor Configuration**
+   After publishing, users can install your server by adding to their `~/.cursor/mcp.json`:
+   ```json
+   {
+     "servers": {
+       "your-server-name": {
+         "command": "npx -y @yourusername/mcp-your-server-name"
+       }
+     }
+   }
+   ```
 
 ## Troubleshooting Flowchart
 
