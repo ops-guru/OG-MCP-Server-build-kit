@@ -16,8 +16,13 @@ If you are an AI agent helping a user create an MCP server, you MUST follow thes
    - Do not proceed until local testing is successful
 
 3. **Cursor Integration**
-   - IMPORTANT: After creating the server, you MUST help the user set up the server in Cursor
-   - Guide them through Step 6 to create/update their `~/.cursor/mcp.json`
+   ⚠️ **CRITICAL CONFIGURATION RULES**:
+   - The MCP configuration file is a GLOBAL file at `~/.cursor/mcp.json`
+   - NEVER create an mcp.json file in the project directory
+   - ALWAYS check if the global file exists before modifying
+   - ALWAYS preserve existing server configurations
+   - ALWAYS use `mcpServers` as the root key
+   - Guide them through modifying their global `~/.cursor/mcp.json`
    - Help them verify the installation is working
 
 4. **Optional: Publishing**
@@ -31,6 +36,7 @@ Remember:
 - Always prompt for Cursor configuration
 - Verify each step before moving to the next
 - Help troubleshoot any issues using the guide's debugging sections
+- NEVER create project-specific mcp.json files
 
 ## AI Agent Implementation Patterns
 
@@ -50,7 +56,7 @@ When implementing an MCP server as an AI agent, follow these patterns:
    4. Add initial ping tool
    5. Add user's requested tools
    6. Test locally
-   7. Configure in Cursor
+   7. Configure in GLOBAL Cursor configuration
    8. Optional: Publish to npm
    ```
 
@@ -69,8 +75,9 @@ When implementing an MCP server as an AI agent, follow these patterns:
    - Update configuration if needed
 
 5. **Configuration Verification**
-   After creating `~/.cursor/mcp.json`:
-   - Confirm file exists
+   When modifying the GLOBAL `~/.cursor/mcp.json`:
+   - Check if file exists BEFORE attempting to modify
+   - Read and preserve ALL existing configurations
    - Verify JSON syntax
    - Check server name matches
    - Test with ping tool
@@ -415,9 +422,15 @@ cat ~/mcp-debug.log
 For a quick start with your MCP server in Cursor:
 
 1. **Add MCP Server Configuration**
-   Update your Cursor MCP configuration file at `~/.cursor/mcp.json`. IMPORTANT: Preserve any existing configuration!
+   Update the global Cursor MCP configuration file at `~/.cursor/mcp.json`. 
    
-   Example of adding your server to an existing configuration:
+   ⚠️ **AI AGENTS**: This is a GLOBAL configuration file. You MUST:
+   1. Check if the file exists
+   2. Read existing content if it does
+   3. Preserve ALL existing configurations
+   4. Add the new server configuration without modifying others
+   
+   Example of adding your server while preserving existing configuration:
    ```json
    {
      "mcpServers": {
@@ -426,42 +439,7 @@ For a quick start with your MCP server in Cursor:
          "command": "npx",
          "args": [
            "-y",
-           "my-mcp-server"
-         ]
-       }
-     }
-   }
-   ```
-
-   Configuration Format Rules:
-   - Use `mcpServers` as the root object (NOT `servers`)
-   - Each server needs both `command` and `args` fields
-   - The `args` field must be an array
-   - Don't modify or remove other server configurations
-   - Server name must match exactly with your server code
-
-   Common Configuration Patterns:
-   ```json
-   {
-     "mcpServers": {
-       // Local development
-       "dev-server": {
-         "command": "node",
-         "args": ["./bin/server.cjs"]
-       },
-       // Published package
-       "prod-server": {
-         "command": "npx",
-         "args": ["-y", "@yourusername/mcp-server"]
-       },
-       // With environment variables
-       "api-server": {
-         "command": "env",
-         "args": [
-           "API_KEY=your-secret-key",
-           "npx",
-           "-y",
-           "@yourusername/mcp-api-server"
+           "@yourusername/mcp-server"
          ]
        }
      }
@@ -510,15 +488,23 @@ You can configure multiple MCP servers in your `~/.cursor/mcp.json` file:
 
 ```json
 {
-  "servers": {
+  "mcpServers": {
     "utility-server": {
-      "command": "npx -y @yourusername/mcp-utility-server"
+      "command": "npx",
+      "args": ["-y", "@yourusername/mcp-utility-server"]
     },
     "data-processing": {
-      "command": "node ./local/path/to/server.cjs"
+      "command": "node",
+      "args": ["./local/path/to/server.cjs"]
     },
     "api-server": {
-      "command": "env API_KEY=your-secret-key npx -y @yourusername/mcp-api-server"
+      "command": "env",
+      "args": [
+        "API_KEY=your-secret-key",
+        "npx",
+        "-y",
+        "@yourusername/mcp-api-server"
+      ]
     }
   }
 }
@@ -531,9 +517,15 @@ Some MCP servers require environment variables or API keys:
 1. **Using env command**:
    ```json
    {
-     "servers": {
+     "mcpServers": {
        "api-server": {
-         "command": "env API_KEY=your-secret-key npx -y @yourusername/mcp-api-server"
+         "command": "env",
+         "args": [
+           "API_KEY=your-secret-key",
+           "npx",
+           "-y",
+           "@yourusername/mcp-api-server"
+         ]
        }
      }
    }
@@ -542,9 +534,10 @@ Some MCP servers require environment variables or API keys:
 2. **Using environment files**:
    ```json
    {
-     "servers": {
+     "mcpServers": {
        "api-server": {
-         "command": "bash -c \"source .env && npx -y @yourusername/mcp-api-server\""
+         "command": "bash",
+         "args": ["-c", "source .env && npx -y @yourusername/mcp-api-server"]
        }
      }
    }
@@ -557,9 +550,10 @@ Control server versions in your configuration:
 1. **Pin specific version**:
    ```json
    {
-     "servers": {
+     "mcpServers": {
        "stable-server": {
-         "command": "npx -y @yourusername/mcp-server@1.2.3"
+         "command": "npx",
+         "args": ["-y", "@yourusername/mcp-server@1.2.3"]
        }
      }
    }
@@ -568,9 +562,10 @@ Control server versions in your configuration:
 2. **Use latest version**:
    ```json
    {
-     "servers": {
+     "mcpServers": {
        "edge-server": {
-         "command": "npx -y @yourusername/mcp-server@latest"
+         "command": "npx",
+         "args": ["-y", "@yourusername/mcp-server@latest"]
        }
      }
    }
@@ -583,9 +578,10 @@ Different configurations for different environments:
 1. **Development** (using local files):
    ```json
    {
-     "servers": {
+     "mcpServers": {
        "dev-server": {
-         "command": "node ./bin/server.cjs"
+         "command": "node",
+         "args": ["./bin/server.cjs"]
        }
      }
    }
@@ -594,9 +590,10 @@ Different configurations for different environments:
 2. **Production** (using published package):
    ```json
    {
-     "servers": {
+     "mcpServers": {
        "prod-server": {
-         "command": "npx -y @yourusername/mcp-server"
+         "command": "npx",
+         "args": ["-y", "@yourusername/mcp-server"]
        }
      }
    }
@@ -690,9 +687,13 @@ If you want to share your MCP server with others, you'll need to publish it to n
    After publishing, users can install your server by adding to their `~/.cursor/mcp.json`:
    ```json
    {
-     "servers": {
+     "mcpServers": {
        "your-server-name": {
-         "command": "npx -y @yourusername/mcp-your-server-name"
+         "command": "npx",
+         "args": [
+           "-y",
+           "@yourusername/mcp-your-server-name"
+         ]
        }
      }
    }
