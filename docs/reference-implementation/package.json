@@ -1,0 +1,27 @@
+{
+  "name": "@modelcontextprotocol/reference-server",
+  "version": "0.1.0",
+  "description": "Reference implementation of a minimal MCP server",
+  "type": "commonjs",
+  "main": "index.js",
+  "bin": {
+    "mcp-reference-server": "bin/server.cjs"
+  },
+  "scripts": {
+    "start": "node bin/server.cjs"
+  },
+  "keywords": [
+    "mcp",
+    "modelcontextprotocol",
+    "reference"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.7.0",
+    "zod": "^3.24.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+} 
