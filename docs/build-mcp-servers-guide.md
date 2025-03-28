@@ -415,12 +415,54 @@ cat ~/mcp-debug.log
 For a quick start with your MCP server in Cursor:
 
 1. **Add MCP Server Configuration**
-   Create or update your Cursor MCP configuration file at `~/.cursor/mcp.json`:
+   Update your Cursor MCP configuration file at `~/.cursor/mcp.json`. IMPORTANT: Preserve any existing configuration!
+   
+   Example of adding your server to an existing configuration:
    ```json
    {
-     "servers": {
+     "mcpServers": {
+       // ... existing servers remain unchanged ...
        "my-mcp-server": {
-         "command": "npx -y my-mcp-server"
+         "command": "npx",
+         "args": [
+           "-y",
+           "my-mcp-server"
+         ]
+       }
+     }
+   }
+   ```
+
+   Configuration Format Rules:
+   - Use `mcpServers` as the root object (NOT `servers`)
+   - Each server needs both `command` and `args` fields
+   - The `args` field must be an array
+   - Don't modify or remove other server configurations
+   - Server name must match exactly with your server code
+
+   Common Configuration Patterns:
+   ```json
+   {
+     "mcpServers": {
+       // Local development
+       "dev-server": {
+         "command": "node",
+         "args": ["./bin/server.cjs"]
+       },
+       // Published package
+       "prod-server": {
+         "command": "npx",
+         "args": ["-y", "@yourusername/mcp-server"]
+       },
+       // With environment variables
+       "api-server": {
+         "command": "env",
+         "args": [
+           "API_KEY=your-secret-key",
+           "npx",
+           "-y",
+           "@yourusername/mcp-api-server"
+         ]
        }
      }
    }
@@ -436,20 +478,29 @@ For a quick start with your MCP server in Cursor:
      d. Optionally providing a message parameter
      e. Checking the response ("Pong!") and the log file for confirmation
 
-3. **Troubleshooting**
+3. **Troubleshooting Configuration**
    - If the server doesn't appear in Cursor's MCP tools:
      * Verify the server name in `mcp.json` matches the name in your server code
      * Check `~/mcp-debug.log` for startup errors
      * Ensure the `bin` field in package.json matches your server name
+     * Verify your `mcp.json` syntax is valid
+     * Check that you used `mcpServers` (not `servers`)
+     * Confirm both `command` and `args` are present
    - If you see connection errors:
      * Verify the server is executable (`chmod +x bin/server.cjs`)
      * Check if `npx -y my-mcp-server` works in terminal
      * Look for error messages in Cursor's developer console
+   - If you broke existing configuration:
+     * Check your git history for the previous version
+     * Only add your server, don't modify others
+     * Keep the JSON structure intact
 
 4. **Development Tips**
    - Monitor `~/mcp-debug.log` while developing
    - Test tool changes by restarting Cursor
    - Use the log file to debug tool execution and parameter handling
+   - Back up your `mcp.json` before making changes
+   - Use JSON validation tools when editing
 
 ## Advanced Configuration
 
